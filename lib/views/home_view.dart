@@ -27,7 +27,7 @@ class HomeView extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: (){
-                      todoController.deleteTodo(todo.id);
+                      todoController.deleteTodo(todo.id!);
                     },
                     icon: Icon(Icons.delete),
                   ),

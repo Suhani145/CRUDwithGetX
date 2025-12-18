@@ -33,14 +33,14 @@ class TodoFormView extends StatelessWidget {
             ),
             SizedBox(height:16),
             ElevatedButton(
-                onPressed: (){
+                onPressed: () async{
                   if(todo == null){
-                    todoController.addTodo(
-                        titleController.text, descriptionController.text);
+                   await todoController.addTodo(
+                        titleController.text.trim(), descriptionController.text.trim());
                   }
                   else{
-                    todoController.updateTodo(
-                        todo!.id, titleController.text, descriptionController.text);
+                    await todoController.updateTodo(
+                        todo!.id!, titleController.text.trim(), descriptionController.text.trim());
                   }
                   Get.back();
                 },
