@@ -60,7 +60,8 @@ Future<void> _onCreate(Database db, int version) async{
       'description' : todo.description
     },
       where: '$columnId = ?',
-      whereArgs: [id]
+      whereArgs: [id],
+      conflictAlgorithm: ConflictAlgorithm.replace
     );
   }
 
