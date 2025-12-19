@@ -1,83 +1,88 @@
-import 'package:flutter/material.dart';
+import 'dart:core';
 import 'package:sqflite/sqflite.dart';
-
+import 'package:path/path.dart';
 import '../models/todo.dart';
 
 class DBService{
+  static final _databaseName = "todo_list.db";
+  static final _databaseVersion = 1;
+  static final tableName = "todo_table";
+  static final columnId= 'id';
+  static final columnTitle = 'title';
+  static final columnDescription = 'description';
+  DBService._privateConstructor();
+  static final DBService instance = DBService._privateConstructor();
   Database? _databaseService;
-  final DatabaseName = "todo_list.db";
-  final DatabaseVersion = 1;
-  final TableName = "todo_table";
 
-  //DB initialization and check if DB is null
-Future<Database> get database async{
-  if(_databaseService != null){
+  Future<Database> get database async{
+    if(_databaseService != null){
+      return _databaseService!;
+    }
+    _databaseService = await _initDatabase();
     return _databaseService!;
   }
-  //get DB path
-  final DatabasePath = await getDatabasesPath();
-  final path = "$DatabasePath/$DatabaseName";
 
-  //open DB
-  return await openDatabase(path,
-  version: DatabaseVersion,
-    onCreate: (db, version)async{
-    await db.execute('''
-    CREATE TABLE $TableName(
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     title TEXT NOT NULL,
-     description TEXT NOT NULL
-    )
-    ''');
-    }
-  );
+  //initialize the database
+  Future<Database>_initDatabase() async{
+    String path = join(await getDatabasesPath(),_databaseName);
+    return await openDatabase(path,
+      version: _databaseVersion,
+      onCreate: _onCreate
+    );
+}
+
+//create the sql table
+Future<void> _onCreate(Database db, int version) async{
+    await db.execute(
+      '''CREATE TABLE $tableName(
+      $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+      $columnTitle TEXT NOT NULL,
+      $columnDescription TEXT NOT NULL
+      )'''
+    );
+}
+
+//add new tasks
+  Future<int> insert(Todo todo) async{
+    Database db = await instance.database;
+    var result = await db.insert(tableName, todo.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace);
+    return result;
   }
 
-  //insert data
-  Future<void> insertTodo(Todo todoModel) async{
-    final db = await database;
-    print('Insert the todo');
-    await db.insert(TableName, todoModel.toMap());
-  }
-
-  //delete data
-  Future<void> deleteTodo(int id) async {
-    final db = await database;
-    print('delete the todo');
-    await db.delete(TableName,
-      where: 'id = ?',
-      whereArgs: [id],
+  //update the tasks
+  Future<int> update(int id, Todo todo) async{
+    Database db = await instance.database;
+    return db.update(tableName,
+    {
+      'title' : todo.title,
+      'description' : todo.description
+    },
+      where: '$columnId = ?',
+      whereArgs: [id]
     );
   }
 
-    //update data
-    Future<void> updateTodo(int id, Todo todoModel) async {
-      final db = await database;
-      print("update the todo");
-      await db.update(TableName,
-        todoModel.toMap(),
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-    }
-      //fetch all data
-      Future<List<Todo>> fetchAllTodo() async{
-        final db = await database;
-        final List<Map<String, dynamic>> maps = await db.query(TableName);
-        print("Fetch all the todos");
-        return List.generate(maps.length, (i) {
-          return Todo.fromMap(maps[i]);
-        }
-        );
-      }
-
-
-
-  //close DB
-  Future<void> closeDatabase() async{
-    final db = await database;
-    print("cosing db");
-    return db.close();
+  //delete the task
+  Future<int> delete(int id) async{
+    Database db = await instance.database;
+    return await db.delete(tableName,
+    where: '$columnId = ?',
+      whereArgs: [id]
+    );
   }
 
+  //fetch all task data
+  Future<List<Map<String, dynamic>>> fetchAllTasks() async{
+    Database db = await instance.database;
+    var res = await db.query(tableName, orderBy: "$columnId DESC");
+    return res;
+  }
+
+  Future<List<Map<String, dynamic?>>> clearTasks() async{
+      Database db = await instance.database;
+      return await db.rawQuery("DELETE FROM $tableName");
+     }
 }
+
+
