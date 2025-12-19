@@ -81,7 +81,7 @@ Future<void> _onCreate(Database db, int version) async{
     return res;
   }
 
-  Future<List<Map<String, dynamic?>>> clearTasks() async{
+  Future<List<Map<String, dynamic>>> clearTasks() async{
       Database db = await instance.database;
       return await db.rawQuery("DELETE FROM $tableName");
      }
