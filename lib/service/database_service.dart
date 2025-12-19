@@ -25,9 +25,10 @@ class DBService{
   //initialize the database
   Future<Database>_initDatabase() async{
     String path = join(await getDatabasesPath(),_databaseName);
-    return await openDatabase(path,
-      version: _databaseVersion,
-      onCreate: _onCreate
+    return await openDatabase(
+        path,
+        version: _databaseVersion,
+        onCreate: _onCreate
     );
 }
 
