@@ -13,7 +13,6 @@ class TodoFormView extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text(todo == null ? "Add Task" : "Edit Task"),

@@ -16,13 +16,12 @@ class TodoController extends GetxController{
   }
 
   Future<void> _fetchTodo() async{
-    print("Fetching all todo");
     DBService.instance.fetchAllTasks().then((value)
     {
-      value.forEach((element){
+      for (var element in value) {
         todos.add(Todo(id: element['id'], title: element['title'],
         description: element['description']));
-      });
+      }
     }
     );
   }
